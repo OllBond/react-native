@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import { useState, useEffect } from "react";
 
-import useRoute from "../router";
+import useRoute from "./router";
 import { store } from "./redux/store";
 
 import Main from "./components/Main";
