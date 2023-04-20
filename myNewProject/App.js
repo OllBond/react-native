@@ -1,48 +1,50 @@
 import { Provider } from "react-redux";
 
 import { StatusBar } from "expo-status-bar";
-import { NavigationContainer } from "@react-navigation/native";
 
-import { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
 
-import useRoute from "./router";
 import { store } from "./redux/store";
+
+import { useCallback } from "react";
+
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 
 import Main from "./components/Main";
 
-// import { getAuth, onAuthStateChanged } from "firebase/auth";
-// import db from "./firebase/config";
-// const auth = getAuth(db);
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  // const [user, setUser] = useState(null);
+  const [fontsLoaded] = useFonts({
+    RobotoRegular: require("./assets/fonts/Roboto-Regular.ttf"),
+    RobotoMedium: require("./assets/fonts/Roboto-Medium.ttf"),
+    RobotoBold: require("./assets/fonts/Roboto-Bold.ttf"),
+  });
 
-  // // useEffect(() => {}, []);
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
 
-  // const authStateChanged = async () => {
-  //   try {
-  //     onAuthStateChanged(auth, (user) => {
-  //       setUser(user);
-  //       // console.log(user, "APP ");
-  //     });
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // };
-
-  // authStateChanged();
-
-  // const routing = useRoute(user);
-
+  if (!fontsLoaded) {
+    return null;
+  }
   return (
     <>
       <Provider store={store}>
-        {/* <isAuthContext.Provider value={{ isAuth, toggleIsAuth }}> */}
-        <StatusBar style="auto" />
-        {/* <NavigationContainer>{routing}</NavigationContainer> */}
-        <Main />
-        {/* </isAuthContext.Provider> */}
+        <View onLayout={onLayoutRootView} style={styles.container}>
+          <StatusBar style="auto" />
+          <Main />
+        </View>
       </Provider>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

@@ -6,6 +6,7 @@ import {
   TextInput,
   SafeAreaView,
   FlatList,
+  Image,
 } from "react-native";
 
 import { useState, useEffect } from "react";
@@ -21,20 +22,25 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
+import { AntDesign } from "@expo/vector-icons";
+
 const db = getFirestore(app);
 
 const CommentsScreen = ({ route, navigation }) => {
-  const { postId } = route.params;
+  const { postId, photo } = route.params;
   const [comment, setComment] = useState("");
   const [allComments, setAllComments] = useState([]);
+  const [commentsCount, setCommentsCount] = useState(0);
 
   const { userName } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // navigation.setOptions({ tabBarStyle: { display: "none" } });
-    // NavigationBar.getVisibilityAsync("hidden");
     getAllPosts();
   }, []);
+
+  useEffect(() => {
+    navigation.setParams({ commentsCount: commentsCount });
+  }, [commentsCount]);
 
   const createPost = async () => {
     if (!comment.trim()) {
@@ -54,6 +60,7 @@ const CommentsScreen = ({ route, navigation }) => {
   const getAllPosts = async () => {
     try {
       const docRef = await doc(db, "posts", postId);
+
       onSnapshot(collection(docRef, "comments"), (data) =>
         setAllComments(
           data.docs.map((doc) => ({
@@ -61,38 +68,45 @@ const CommentsScreen = ({ route, navigation }) => {
           }))
         )
       );
+
+      setCommentsCount(Number(allComments.length));
+      console.log(commentsCount, "commentsCount");
+
+      // const commentsQuery = query(collection(db, `posts/${postId}/comments`));
+
+      // onSnapshot(commentsQuery, (data) => {
+      //   const commentsData = data.docs.map((doc) => ({
+      //     ...doc.data(),
+      //     postId: doc.id,
+      //   }));
+      //   setAllComments(commentsData);
+      //   console.log(commentsData.length, "commentsData");
+      //   setCommentsCount(commentsData.length);
+      // });
     } catch (error) {
       console.log(error);
     }
-
-    // const docRef = await doc(db, "posts", postId);
-    // const querySnapshot = await getDocs(collection(docRef, "comments"));
-
-    // await querySnapshot.forEach((doc) => {
-    //   // console.log(doc.data(), "data");
-    //   // console.log(doc.post.date, "time")
-    //   setAllComments((prevAllComment) => [
-    //     ...prevAllComment,
-    //     { ...doc.data(), id: doc.id },
-    //   ]);
-    // });
   };
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.container}>
-        <FlatList
-          data={allComments}
-          renderItem={({ item }) => (
-            <View style={styles.commentContainer}>
-              <Text>{item.userName}</Text>
-              <Text>{item.comment}</Text>
-              {/* <Text>{item.postDate}</Text> */}
-            </View>
-          )}
-          keyExtractor={(item) => item.id}
-        />
-      </SafeAreaView>
+      <View style={styles.postWrapper}>
+        <Image source={{ uri: photo }} style={styles.post} />
+        <Text>{allComments.length}</Text>
+        <SafeAreaView style={styles.wrapper}>
+          <FlatList
+            data={allComments}
+            renderItem={({ item }) => (
+              <View style={styles.commentContainer}>
+                <Text style={styles.userName}>{item.userName}</Text>
+                <Text>{item.comment}</Text>
+                {/* <Text>{item.postDate}</Text> */}
+              </View>
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        </SafeAreaView>
+      </View>
 
       <TextInput
         placeholderTextColor={"#BDBDBD"}
@@ -101,12 +115,14 @@ const CommentsScreen = ({ route, navigation }) => {
         value={comment}
         onChangeText={(value) => setComment(value)}
       ></TextInput>
+
       <TouchableOpacity
         style={styles.button}
         activeOpacity={0.8}
         onPress={createPost}
       >
-        <Text style={styles.buttonText}>Опубликовать</Text>
+        <AntDesign name="arrowup" size={20} color="#FFFFFF" />
+        {/* <Text style={styles.buttonText}>Опубликовать</Text> */}
       </TouchableOpacity>
     </View>
   );
@@ -118,59 +134,60 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    // justifyContent: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
+  },
+  wrapper: {
+    // borderColor: "red",
+    // borderWidth: 1,
+    height: 280,
   },
   commentContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.03)",
-    marginHorizontal: 10,
-    padding: 10,
-    marginBottom: 10,
-  },
-  headerWrapper: {
-    justifyContent: "flex-end",
-    alignItems: "center",
-    height: 88,
-    borderBottomWidth: 1,
-    borderBottomColor: "#BDBDBD",
-  },
-  headerText: {
-    marginBottom: 11,
-    fontSize: 17,
-  },
-  tabBarWrapper: {
-    marginTop: 570,
-    alignItems: "center",
-    height: 88,
-    borderBottomWidth: 1,
-    borderBottomColor: "#BDBDBD",
-  },
-  // input: {
-  //   marginTop: 32,
-  //   borderBottomWidth: 1,
-  //   // marginHorizontal: 20,
-  //   borderBottomColor: "#E8E8E8",
-  //   paddingBottom: 8,
-
-  // },
-  input: {
-    marginHorizontal: 16,
     padding: 16,
-    border: "1px solid #E8E8E8",
+    marginBottom: 24,
+    borderRadius: 6,
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    borderColor: "rgba(0, 0, 0, 0.03)",
+    borderWidth: 1,
+  },
+  post: {
+    height: 240,
+    width: "100%",
+    borderRadius: 8,
+    marginBottom: 32,
+  },
+  input: {
+    marginBottom: 16,
+    padding: 16,
     height: 50,
-    fontFamily: "Roboto-Regular",
-    color: "#212121",
+    fontFamily: "RobotoRegular",
+    fontStyle: "normal",
     fontSize: 16,
-    lineHeight: 19,
+    lineHeight: 18,
+    color: "#212121",
     backgroundColor: "#F6F6F6",
     boxSizing: "border-box",
     borderRadius: 100,
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+  },
+  userName: {
+    fontFamily: "RobotoRegular",
+    fontStyle: "normal",
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#BDBDBD",
   },
   button: {
+    position: "absolute",
+    left: "84%",
+    top: "85.5%",
     marginHorizontal: 25,
     marginTop: 32,
     marginBottom: 30,
-    backgroundColor: "#F6F6F6",
-    height: 61,
+    backgroundColor: "#FF6C00",
+    height: 35,
+    width: 35,
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
