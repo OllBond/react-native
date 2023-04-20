@@ -3,8 +3,8 @@ import { TouchableOpacity } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import PostsScreen from "./PostsScreen";
-import MapScreen from "../nestedScreens/MapScreen";
-import CommentsScreen from "../nestedScreens/CommentsScreen";
+import MapScreen from "../nestedScreen/MapScreen";
+import CommentsScreen from "../nestedScreen/CommentsScreen";
 
 import { Feather } from "@expo/vector-icons";
 
