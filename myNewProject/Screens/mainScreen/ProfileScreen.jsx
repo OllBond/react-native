@@ -32,6 +32,7 @@ const ProfileScreen = ({ navigation, route }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [commentsCount, setCommentsCount] = useState({});
   const { userId, userName, userEmail } = useSelector((state) => state.auth);
+  console.log(userEmail);
 
   const getAllPost = async () => {
     try {

@@ -19,8 +19,8 @@ import {
   getFirestore,
   collection,
   onSnapshot,
-  doc,
   query,
+  where,
 } from "firebase/firestore";
 
 const db = getFirestore(app);
@@ -29,20 +29,31 @@ const PostsScreen = ({ navigation, route }) => {
   const [posts, setPosts] = useState([]);
   const [commentsCount, setCommentsCount] = useState({});
 
-  const { userName, userEmail } = useSelector((state) => state.auth);
+  const { userName, userEmail, userId } = useSelector((state) => state.auth);
 
   useEffect(() => {
     getAllPost();
     posts.forEach((post) => {
       getCommentsCount(post.id);
     });
-  }, []);
+  }, [posts]);
 
   const getAllPost = async () => {
     try {
-      await onSnapshot(collection(db, "posts"), (snapshots) => {
-        setPosts(snapshots.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const userPostsRef = collection(db, "posts");
+      const queryRef = query(userPostsRef, where("userId", "==", userId));
+      const unsubscribe = await onSnapshot(queryRef, (querySnapshot) => {
+        const userPosts = querySnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setPosts(userPosts);
       });
+      return () => unsubscribe();
+
+      // await onSnapshot(collection(db, "posts"), (snapshots) => {
+      //   setPosts(snapshots.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      // });
     } catch (error) {
       console.log(error.massage);
       Alert.alert("Try again");

@@ -54,6 +54,8 @@ const CommentsScreen = ({ route, navigation }) => {
       userName,
       postDate: new Date(),
     });
+
+    console.log(comment, "ADD");
     setComment("");
   };
 
@@ -70,7 +72,7 @@ const CommentsScreen = ({ route, navigation }) => {
       );
 
       setCommentsCount(Number(allComments.length));
-      console.log(commentsCount, "commentsCount");
+      // console.log(commentsCount,"commentsCount")
 
       // const commentsQuery = query(collection(db, `posts/${postId}/comments`));
 
