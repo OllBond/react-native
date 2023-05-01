@@ -38,7 +38,7 @@ const LoginScreen = ({ navigation }) => {
   const handleSubmit = () => {
     dispatch(authSignInUser(state));
 
-    navigation.navigate("Home");
+    // navigation.navigate("Home");
     setState(initialState);
   };
 
